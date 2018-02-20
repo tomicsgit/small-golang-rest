@@ -55,10 +55,10 @@ func (e Employee) SayHi() string {
 	return "I'm a decent gye " + e.Name + " working at " + e.Company + "!"
 }
 
-func (e Employee) SpendSalary(amount float32) {
+func (e *Employee) SpendSalary(amount float32) {
 	e.Salary -= amount // More vodka please!!! Get me through the day!
 }
 
-func (s Student) BorrowMoney(amount float32) {
+func (s *Student) BorrowMoney(amount float32) {
 	s.Loan += amount // (again and again and...)
 }
