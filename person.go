@@ -22,6 +22,11 @@ type Employee struct {
 	Salary  float32 `json:"salary"`
 }
 
+type Person struct {
+	Stud *Student
+	Emp *Employee
+}
+
 // define interfaces
 type ManInterface interface {
 	SetId(id int, e error)

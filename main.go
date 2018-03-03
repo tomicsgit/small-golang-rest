@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"strconv"
 	"fmt"
-	"io/ioutil"
 )
 var people []ManInterface
 
@@ -27,13 +26,23 @@ func main() {
 	people = append(people, marko)
 	people = append(people, milos)
 
+	router.HandleFunc("/", PrintWelcomeMessage).Methods("GET")
 	router.HandleFunc("/people", GetPeople).Methods("GET")
 	router.HandleFunc("/people/{id}", GetPerson).Methods("GET")
 	router.HandleFunc("/people/{id}", CreatePerson).Methods("POST")
 	router.HandleFunc("/people/{id}", DeletePerson).Methods("DELETE")
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":8090", router))
 }
 
+func PrintWelcomeMessage(w http.ResponseWriter, r *http.Request) {
+	var intro = []string{
+		"Simple REST API example in Golang",
+		"by Dragan Tomic",
+		"Thank you for checking my Golang rest API example!",
+	}
+	message, _ := json.Marshal(intro)
+	w.Write(message)
+}
 
 func GetPeople (w http.ResponseWriter, r *http.Request) {
 	if p, err := json.Marshal(people); err == nil {
@@ -55,35 +64,40 @@ func GetPerson(w http.ResponseWriter, r *http.Request) {
 func CreatePerson(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
+	//params := mux.Vars(r)
 	code := 422
-	var dat Employee
+	var person Employee
 
-	body, _ := ioutil.ReadAll(r.Body)
-
-	if err := json.Unmarshal(body, &dat); err != nil {
-		panic(err)
+	b1 := []byte(`{"Id":5, "Name":"Dragan Tomic", "Age":33, "Company":"AOE GmbH", "Salary":4322.3}`)
+	//body, _ := ioutil.ReadAll(r.Body)
+	if err := json.Unmarshal(b1, &person); err != nil {
+		log.Fatal(err)
 	}
-	fmt.Println(dat)
+	fmt.Println("========================1")
+	fmt.Printf("%+v\n", person)
+	fmt.Println("========================2")
 
+
+	var person1 Person
+
+	b2 := []byte(`{"Emp": {"Id":5, "Name":"Dragan Tomic", "Age":33, "Company":"AOE GmbH", "Salary":4322.3}}`)
+	if err := json.Unmarshal(b2, &person1); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%+v\n", person1)
+	fmt.Println("========================3")
+	/*
+		var incomingMessage1 Human
+		b2 := []byte(`{"Id":5,"Name":"Dragan Tomic","Age":33}`)
+		if err := json.Unmarshal(b2, &incomingMessage1); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("%+v\n", incomingMessage1)
+		fmt.Printf("\tcommand: %s\n", incomingMessage1.Name)
+		fmt.Println("========================")
+	*/
 	w.WriteHeader(code)
 	return
-/*	params := mux.Vars(r)
-
-	var person ManInterface
-	if body, err := ioutil.ReadAll(r.Body); err == nil {
-		fmt.Println(json.Unmarshal(body, &person))
-	}
-
-//	_ = json.NewDecoder(r.Body).Decode(&person)
-fmt.Println(person)
-fmt.Println(json.Marshal(people))
-
-	person.SetId(strconv.Atoi(params["id"]))
-	people = append(people, person)
-	if p, err := json.Marshal(people); err == nil {
-		w.Write(p)
-	}
-*/
 }
 
 func DeletePerson(w http.ResponseWriter, r *http.Request) {
